@@ -1,0 +1,28 @@
+
+# Dockerfile para CPU (alternativo)
+
+FROM python:3.10-slim
+
+# Variáveis de ambiente
+ENV CACHE_DIR=/app/cached_audio
+
+# Instala dependências do sistema
+RUN apt-get update && apt-get install -y     ffmpeg     && rm -rf /var/lib/apt/lists/*
+
+# Cria diretório de trabalho
+WORKDIR /app
+
+# Copia os arquivos do projeto
+COPY . /app
+
+# Instala dependências Python
+RUN pip install --upgrade pip     && pip install torch==2.2.0 --index-url https://download.pytorch.org/whl/cpu     && pip install TTS fastapi uvicorn[standard] transformers accelerate
+
+# Cria diretório de cache
+RUN mkdir -p $CACHE_DIR
+
+# Expõe a porta
+EXPOSE 5001
+
+# Comando para rodar a API
+CMD ["uvicorn", "fastapi_app:app", "--host", "0.0.0.0", "--port", "5001"]

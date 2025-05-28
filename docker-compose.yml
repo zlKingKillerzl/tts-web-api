@@ -1,0 +1,20 @@
+
+version: '3.9'
+
+services:
+  tts-api:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Padrão com GPU
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./cached_audio:/app/cached_audio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]  # Mantido por padrão para GPU
+    environment:
+      - CACHE_DIR=/app/cached_audio
+    restart: unless-stopped

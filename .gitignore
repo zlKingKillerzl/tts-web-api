@@ -1,0 +1,53 @@
+# Ambiente Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pyc
+*.egg-info/
+.env
+.venv
+env/
+venv/
+*.log
+
+# Cache de áudio - mantém apenas info.txt
+cached_audio/*
+!cached_audio/info.txt
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# Arquivos de configuração de IDEs
+.vscode/
+.idea/
+
+# Arquivos do sistema operacional
+*.swp
+*.swo
+*.swn
+
+# Arquivos de dependências Conda
+*.conda
+*.lock
+
+# Arquivos de Docker
+*.tar
+
+# Dados pessoais
+speaker.wav
+
+# Arquivos temporários ou backups
+*.old
+*.orig
+*.save
+*.backup
+
+# Outros
+node_modules/
+dist/
+build/

@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coqui TTS Pro - Síntese de Voz Avançada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* CSS Variables for a Harmonious Dark Mode Palette */
+        :root {
+            --color-bg-primary: #1A1A2E; /* Deep Indigo/Dark Blue-Purple */
+            --color-bg-secondary: #2A2A4A; /* Slightly Lighter Indigo/Dark Blue-Purple (for cards/panels) */
+            --color-text-primary: #E0E0E0; /* Off-White */
+            --color-text-secondary: #A0A0A0; /* Medium Gray */
+            --color-accent-start: #667eea; /* Blue-Violet */
+            --color-accent-end: #764ba2; /* Purple */
+            --color-border: #5A5A8A; /* Muted Purple-Gray */
+            --color-success: #4CAF50; /* Green */
+            --color-error: #EF4444; /* Red */
+
+            /* Dark Mode Specific Colors */
+            --dark-color-bg-primary: #1A1A2E;
+            --dark-color-bg-secondary: #2A2A4A;
+            --dark-color-text-primary: #E0E0E0;
+            --dark-color-text-secondary: #A0A0A0;
+            --dark-color-accent-start: #667eea;
+            --dark-color-accent-end: #764ba2;
+            --dark-color-border: #5A5A8A;
+
+            /* Light Mode Specific Colors */
+            --light-color-bg-primary: #F0F2F5; /* Light Gray Background */
+            --light-color-bg-secondary: #FFFFFF; /* White Cards */
+            --light-color-text-primary: #333333; /* Dark Gray Text */
+            --light-color-text-secondary: #666666; /* Medium Gray Text */
+            --light-color-accent-start: #4CAF50; /* Green */
+            --light-color-accent-end: #2E7D32; /* Darker Green */
+            --light-color-border: #CCCCCC; /* Light Gray Border */
+
+
+            /* Spacing System (8pt Grid) */
+            --spacing-xs: 0.5rem;   /* 8px */
+            --spacing-sm: 1rem;    /* 16px */
+            --spacing-md: 1.5rem;  /* 24px */
+            --spacing-lg: 2rem;    /* 32px */
+            --spacing-xl: 3rem;    /* 48px */
+            --spacing-xxl: 4rem;   /* 64px */
+
+            /* Border Radius */
+            --border-radius-sm: 0.5rem; /* 8px */
+            --border-radius-md: 1rem;   /* 16px */
+            --border-radius-lg: 1.5rem;  /* 24px */
+        }
+
+        /* Apply light mode colors when the 'light-mode' class is active */
+        html.light-mode {
+            --color-bg-primary: var(--light-color-bg-primary);
+            --color-bg-secondary: var(--light-color-bg-secondary);
+            --color-text-primary: var(--light-color-text-primary);
+            --color-text-secondary: var(--light-color-text-secondary);
+            --color-accent-start: var(--light-color-accent-start);
+            --color-accent-end: var(--light-color-accent-end);
+            --color-border: var(--light-color-border);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            display: grid; /* Using Grid for perfect centering */
+            place-items: center; /* Centers content horizontally and vertically */
+            min-height: 100vh;
+            padding: var(--spacing-sm); /* Responsive padding */
+            box-sizing: border-box;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            transition: background-color 0.3s ease; /* Smooth theme transition */
+        }
+
+        .container {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--border-radius-lg); /* Sophisticated rounded corners */
+            box-shadow: 0 clamp(0.5rem, 2vw, 1.25rem) clamp(0.75rem, 3vw, 1.5rem) rgba(0, 0, 0, 0.3),
+                        0 clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 1rem) rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px; /* Max width for desktop */
+            padding: var(--spacing-lg); /* Consistent padding */
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md); /* Consistent gap between elements */
+            /* Glassmorphism effect */
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for glass effect */
+            animation: fadeInScale 0.8s ease-out forwards; /* Entry animation */
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth theme transition */
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        h1 {
+            background: linear-gradient(90deg, var(--color-accent-start), var(--color-accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: clamp(1.8rem, 5vw, 2.8rem); /* Fluid font size for H1 */
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: var(--spacing-sm); /* Consistent spacing */
+            letter-spacing: -0.02em; /* Subtle letter spacing adjustment */
+        }
+
+        label {
+            font-size: clamp(0.875rem, 2vw, 1rem); /* Fluid font size for labels */
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        textarea {
+            background-color: rgba(42, 42, 74, 0.6); /* Semi-transparent background */
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            resize: vertical;
+            min-height: clamp(150px, 25vh, 250px); /* Fluid min-height for textarea */
+            font-size: clamp(0.9rem, 2.5vw, 1rem); /* Fluid font size */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+            line-height: 1.5; /* Optimal line height */
+            width: 100%; /* Garante que o textarea ocupe a largura total */
+        }
+        html.light-mode textarea {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--light-color-text-primary);
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-accent-start);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3); /* Subtle focus ring */
+        }
+
+        select {
+            background-color: rgba(42, 42, 74, 0.6); /* Semi-transparent background */
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            font-size: clamp(0.9rem, 2.5vw, 1rem); /* Fluid font size */
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23A0A0A0'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right var(--spacing-sm) center;
+            background-size: 1.5em 1.5em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+            width: 100%; /* Garante que o select ocupe a largura total */
+        }
+        html.light-mode select {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--light-color-text-primary);
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--color-accent-start);
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.5);
+        }
+
+        button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            font-size: clamp(1rem, 2.5vw, 1.125rem); /* Fluid font size for buttons */
+            cursor: pointer;
+            transition: all 0.3s ease-out; /* Smooth transitions for all button states */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem; /* Usando espaçamento fixo para ícones/texto em botões */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--color-accent-start), var(--color-accent-end));
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(90deg, #5a67d8, #6d4295);
+            transform: translateY(-3px); /* Subtle lift effect */
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4); /* Enhanced shadow on hover */
+        }
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0); /* Press down effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .btn-secondary {
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+        }
+        html.light-mode .btn-secondary {
+            background-color: var(--light-color-bg-secondary);
+            color: var(--light-color-text-primary);
+            border-color: var(--light-color-border);
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: var(--color-border); /* Usa a cor da borda para hover no dark mode */
+            border-color: var(--color-accent-start);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+        }
+        html.light-mode .btn-secondary:hover:not(:disabled) {
+            background-color: var(--light-color-bg-primary); /* Usa a cor de fundo primária para hover no light mode */
+            border-color: var(--light-color-accent-start);
+        }
+        .btn-secondary:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .audio-player-container {
+            background-color: rgba(26, 26, 46, 0.7); /* Slightly darker, semi-transparent */
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px); /* Subtle glassmorphism for player */
+            -webkit-backdrop-filter: blur(5px);
+            opacity: 0; /* Hidden by default for animation */
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            width: 100%; /* Garante que o container do player ocupe a largura total */
+        }
+        html.light-mode .audio-player-container {
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .audio-player-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Audio Player Styles */
+        .custom-audio-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            width: 100%;
+            background-color: var(--color-bg-secondary); /* Cor de fundo do player */
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+        }
+        html.light-mode .custom-audio-controls {
+            background-color: var(--light-color-bg-secondary);
+        }
+
+        .play-pause-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-primary);
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            cursor: pointer;
+            padding: 0;
+            width: clamp(2rem, 5vw, 2.5rem); /* Tamanho fixo para o botão */
+            height: clamp(2rem, 5vw, 2.5rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s ease, color 0.3s ease; /* Smooth theme transition */
+        }
+        html.light-mode .play-pause-btn {
+            color: var(--light-color-text-primary);
+        }
+        .play-pause-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        html.light-mode .play-pause-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 8px; /* Altura da barra de progresso */
+            background-color: var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden; /* Garante que o progresso não vaze */
+            transition: background-color 0.3s ease; /* Smooth theme transition */
+        }
+        html.light-mode .progress-container {
+            background-color: var(--light-color-border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--color-accent-start), var(--color-accent-end));
+            border-radius: 4px;
+            transition: width 0.1s linear; /* Transição suave para o progresso */
+        }
+
+        .time-display {
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+            color: var(--color-text-secondary);
+            min-width: 60px; /* Garante espaço suficiente para o tempo */
+            text-align: center;
+            transition: color 0.3s ease; /* Smooth theme transition */
+        }
+        html.light-mode .time-display {
+            color: var(--light-color-text-secondary);
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .volume-slider {
+            width: clamp(60px, 10vw, 100px); /* Largura fluida para o slider de volume */
+            height: 4px;
+            background-color: var(--color-border);
+            border-radius: 2px;
+            -webkit-appearance: none; /* Remove estilo padrão do slider */
+            appearance: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease; /* Smooth theme transition */
+        }
+        html.light-mode .volume-slider {
+            background-color: var(--light-color-border);
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-accent-start);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+        html.light-mode .volume-slider::-webkit-slider-thumb {
+            background-color: var(--light-color-accent-start);
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-accent-start);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+        html.light-mode .volume-slider::-moz-range-thumb {
+            background-color: var(--light-color-accent-start);
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .volume-icon-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-primary);
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.3s ease; /* Smooth theme transition */
+        }
+        html.light-mode .volume-icon-btn {
+            color: var(--light-color-text-primary);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            bottom: var(--spacing-md);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            pointer-events: none; /* Allows clicks to pass through */
+        }
+
+        .toast {
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            min-width: 250px;
+            max-width: 90vw;
+            text-align: center;
+            pointer-events: auto; /* Re-enable clicks for the toast itself */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+        html.light-mode .toast {
+            background-color: var(--light-color-bg-secondary);
+            color: var(--light-color-text-primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background-color: var(--color-success);
+            color: white;
+        }
+        .toast.error {
+            background-color: var(--color-error);
+            color: white;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        html.light-mode .theme-toggle-btn {
+            background-color: var(--light-color-bg-secondary);
+            color: var(--light-color-text-primary);
+            border-color: var(--light-color-border);
+        }
+        .theme-toggle-btn:hover {
+            background-color: var(--color-border);
+        }
+        html.light-mode .theme-toggle-btn:hover {
+            background-color: var(--light-color-border);
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .flex-col-sm-row {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container" role="main">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+            <i class="fas fa-sun"></i>
+        </button>
+
+        <h1 id="main-title">Gerador de Voz Coqui TTS</h1>
+
+        <section class="input-group">
+            <label for="text-input">Texto para Síntese:</label>
+            <textarea id="text-input" placeholder="Digite o texto aqui..." aria-label="Área para inserir o texto para síntese de voz"></textarea>
+        </section>
+
+        <section class="input-group">
+            <label for="language-select">Selecione o Idioma:</label>
+            <select id="language-select" aria-label="Selecione o idioma para a síntese de voz">
+                <option value="">-- Selecione um idioma --</option>
+                <option value="en">Inglês</option>
+                <option value="es">Espanhol</option>
+                <option value="fr">Francês</option>
+                <option value="de">Alemão</option>
+                <option value="it">Italiano</option>
+                <option value="pt">Português</option>
+                <option value="pl">Polonês</option>
+                <option value="tr">Turco</option>
+                <option value="ru">Russo</option>
+                <option value="nl">Holandês</option>
+                <option value="cs">Tcheco</option>
+                <option value="ar">Árabe</option>
+                <option value="zh-cn">Chinês (Simplificado)</option>
+                <option value="ja">Japonês</option>
+                <option value="hu">Húngaro</option>
+                <option value="ko">Coreano</option>
+                <option value="hi">Hindi</option>
+            </select>
+        </section>
+
+        <div class="flex flex-col flex-col-sm-row gap-4">
+            <button id="generate-button" class="btn-primary flex-1" disabled aria-live="polite">
+                <span id="button-text">Gerar Áudio</span>
+                <div id="spinner" class="spinner hidden" role="status" aria-label="Carregando"></div>
+            </button>
+            <button id="clear-button" class="btn-secondary flex-1" disabled>Limpar Tudo</button>
+        </div>
+
+        <section id="audio-player-section" class="audio-player-container hidden" aria-hidden="true">
+            <div class="custom-audio-controls">
+                <button id="play-pause-btn" class="play-pause-btn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="time-display" id="current-time">0:00</div>
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="time-display" id="duration-time">0:00</div>
+                <div class="volume-control">
+                    <button id="volume-icon-btn" class="volume-icon-btn">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1">
+                </div>
+                <button id="download-btn" class="btn-secondary" style="margin-left: var(--spacing-sm);">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+            <audio id="audio-output" class="hidden"></audio>
+        </section>
+
+        <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+    </main>
+
+    <script async defer>
+        const textInput = document.getElementById('text-input');
+        const languageSelect = document.getElementById('language-select');
+        const generateButton = document.getElementById('generate-button');
+        const clearButton = document.getElementById('clear-button');
+        const buttonText = document.getElementById('button-text');
+        const spinner = document.getElementById('spinner');
+        const audioPlayerSection = document.getElementById('audio-player-section');
+        const audioOutput = document.getElementById('audio-output');
+        const toastContainer = document.getElementById('toast-container'); // Novo container de toasts
+
+        // Custom Audio Player Elements
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationTimeDisplay = document.getElementById('duration-time');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeIconBtn = document.getElementById('volume-icon-btn');
+        const downloadBtn = document.getElementById('download-btn');
+
+        const themeToggleBtn = document.getElementById('theme-toggle-btn'); // Botão de alternar tema
+
+        let isPlaying = false;
+        let isMuted = false;
+        let lastVolume = 1; // Para restaurar o volume ao desmutar
+
+        // --- Theme Toggle Logic ---
+        function applyTheme(theme) {
+            const htmlElement = document.documentElement;
+            if (theme === 'light') {
+                htmlElement.classList.add('light-mode');
+                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>'; // Ícone de lua para mudar para dark
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.remove('light-mode');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>'; // Ícone de sol para mudar para light
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme from localStorage or default to dark
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme('dark'); // Default theme
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark') {
+                applyTheme('light');
+            } else {
+                applyTheme('dark');
+            }
+        });
+        // --- End Theme Toggle Logic ---
+
+        // --- Toast Notification Logic ---
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', type);
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle'} mr-2"></i> ${message}`;
+            toastContainer.appendChild(toast);
+
+            // Trigger show animation
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            // Hide and remove after duration
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => {
+                    toast.remove();
+                }, { once: true });
+            }, duration);
+        }
+        // --- End Toast Notification Logic ---
+
+        // Function to format time (MM:SS)
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        }
+
+        // Function to validate inputs and enable/disable the generate button
+        function validateInputs() {
+            const text = textInput.value.trim();
+            const language = languageSelect.value;
+            generateButton.disabled = !(text && language);
+        }
+
+        // Play/Pause functionality
+        playPauseBtn.addEventListener('click', () => {
+            if (audioOutput.paused || audioOutput.ended) {
+                audioOutput.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                isPlaying = true;
+            } else {
+                audioOutput.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                isPlaying = false;
+            }
+        });
+
+        // Update progress bar and time display
+        audioOutput.addEventListener('timeupdate', () => {
+            const progress = (audioOutput.currentTime / audioOutput.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            currentTimeDisplay.textContent = formatTime(audioOutput.currentTime);
+        });
+
+        // Set duration when audio metadata is loaded
+        audioOutput.addEventListener('loadedmetadata', () => {
+            durationTimeDisplay.textContent = formatTime(audioOutput.duration);
+            volumeSlider.value = audioOutput.volume; // Sincroniza o slider com o volume atual
+            downloadBtn.disabled = false; // Habilita o botão de download quando o áudio é carregado
+        });
+
+        // Handle audio ending
+        audioOutput.addEventListener('ended', () => {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            isPlaying = false;
+            progressBar.style.width = '0%'; // Reset progress bar
+            audioOutput.currentTime = 0; // Reset audio to start
+        });
+
+        // Seek functionality
+        progressContainer.addEventListener('click', (e) => {
+            const clickX = e.offsetX; // X position of the click relative to the container
+            const width = progressContainer.clientWidth; // Total width of the progress bar
+            const duration = audioOutput.duration;
+
+            audioOutput.currentTime = (clickX / width) * duration;
+        });
+
+        // Volume control
+        volumeSlider.addEventListener('input', () => {
+            audioOutput.volume = volumeSlider.value;
+            lastVolume = audioOutput.volume; // Atualiza o último volume para desmutar
+            if (audioOutput.volume === 0) {
+                volumeIconBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                isMuted = true;
+            } else {
+                volumeIconBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                isMuted = false;
+            }
+        });
+
+        // Mute/Unmute functionality
+        volumeIconBtn.addEventListener('click', () => {
+            if (isMuted) {
+                audioOutput.volume = lastVolume > 0 ? lastVolume : 0.5; // Restaura para o último volume ou 0.5
+                volumeSlider.value = audioOutput.volume;
+                volumeIconBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                isMuted = false;
+            } else {
+                lastVolume = audioOutput.volume; // Salva o volume atual antes de mutar
+                audioOutput.volume = 0;
+                volumeSlider.value = 0;
+                volumeIconBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                isMuted = true;
+            }
+        });
+
+        // Download functionality
+        downloadBtn.addEventListener('click', () => {
+            if (audioOutput.src) {
+                const a = document.createElement('a');
+                a.href = audioOutput.src;
+                a.download = 'audio_gerado.wav'; // Nome do arquivo para download
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                showToast("Nenhum áudio disponível para download.", "error");
+            }
+        });
+
+        // Event listener for generate audio button
+        generateButton.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            const language = languageSelect.value;
+
+            if (!text || !language) {
+                showToast("Por favor, insira o texto e selecione o idioma.", "error");
+                return;
+            }
+
+            // Disable buttons and show spinner
+            generateButton.disabled = true;
+            clearButton.disabled = true;
+            playPauseBtn.disabled = true; // Desabilita o botão de play/pause durante a geração
+            downloadBtn.disabled = true; // Desabilita o botão de download durante a geração
+            buttonText.textContent = 'Gerando...';
+            spinner.classList.remove('hidden');
+            showToast("Gerando áudio...", "info", 5000); // Exibe toast de info
+
+            // Reset player state before new generation
+            audioOutput.pause();
+            audioOutput.currentTime = 0;
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            isPlaying = false;
+            progressBar.style.width = '0%';
+            currentTimeDisplay.textContent = '0:00';
+            durationTimeDisplay.textContent = '0:00';
+            audioPlayerSection.classList.add('hidden'); // Esconde o player enquanto gera
+
+            try {
+                const response = await fetch('/synthesize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, language })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const audioFile = data.output_file;
+
+                audioOutput.src = `/${audioFile}?t=${new Date().getTime()}`;
+                audioPlayerSection.classList.remove('hidden');
+                audioPlayerSection.classList.add('visible'); // Trigger animation
+                audioPlayerSection.setAttribute('aria-hidden', 'false');
+                audioOutput.load(); // Carrega o áudio
+                // Não reproduz automaticamente aqui, o usuário deve clicar no play
+                // audioOutput.play(); 
+
+                showToast("Áudio gerado com sucesso! Pressione play para ouvir.", "success");
+                clearButton.disabled = false;
+                playPauseBtn.disabled = false; // Habilita o botão de play/pause
+                // downloadBtn.disabled é habilitado em 'loadedmetadata'
+            } catch (error) {
+                console.error('Erro ao gerar áudio:', error);
+                showToast(`Erro: ${error.message}. Verifique se a API está rodando e o arquivo speaker.wav está presente.`, "error", 7000); // Exibe toast de erro
+                audioPlayerSection.classList.remove('visible'); // Esconde o player em caso de erro
+                audioPlayerSection.classList.add('hidden');
+                audioPlayerSection.setAttribute('aria-hidden', 'true');
+            } finally {
+                // Restaura o estado do botão
+                generateButton.disabled = false;
+                buttonText.textContent = 'Gerar Áudio';
+                spinner.classList.add('hidden');
+            }
+        });
+
+        // Event listener for clear all button
+        clearButton.addEventListener('click', () => {
+            textInput.value = '';
+            languageSelect.value = '';
+            audioOutput.src = '';
+            audioOutput.pause(); // Pause playback
+            audioOutput.currentTime = 0; // Reset audio position
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>'; // Reset play icon
+            isPlaying = false;
+            progressBar.style.width = '0%';
+            currentTimeDisplay.textContent = '0:00';
+            durationTimeDisplay.textContent = '0:00';
+            audioPlayerSection.classList.remove('visible'); // Trigger hide animation
+            audioPlayerSection.setAttribute('aria-hidden', 'true');
+            setTimeout(() => {
+                audioPlayerSection.classList.add('hidden');
+            }, 500); // Match CSS transition duration
+
+            clearButton.disabled = true;
+            playPauseBtn.disabled = true; // Desabilita o botão de play/pause
+            downloadBtn.disabled = true; // Desabilita o botão de download
+            validateInputs();
+            showToast("Interface limpa.", "info"); // Exibe toast de info
+            
+            // Reset volume
+            audioOutput.volume = 1;
+            volumeSlider.value = 1;
+            volumeIconBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            isMuted = false;
+        });
+
+        // Event listeners for real-time validation
+        textInput.addEventListener('input', validateInputs);
+        languageSelect.addEventListener('change', validateInputs);
+
+        // --- Accessibility Shortcuts ---
+        document.addEventListener('keydown', (e) => {
+            // Spacebar for Play/Pause
+            if (e.code === 'Space' && !textInput.matches(':focus') && !languageSelect.matches(':focus')) {
+                e.preventDefault(); // Prevent scrolling
+                if (!playPauseBtn.disabled) {
+                    playPauseBtn.click();
+                }
+            }
+            // Ctrl + L for Clear All
+            if (e.ctrlKey && e.code === 'KeyL') {
+                e.preventDefault(); // Prevent default browser action
+                if (!clearButton.disabled) {
+                    clearButton.click();
+                }
+            }
+        });
+        // --- End Accessibility Shortcuts ---
+
+        // Initialize button states on page load
+        validateInputs();
+        playPauseBtn.disabled = true; // Garante que o play/pause esteja desabilitado no início
+        downloadBtn.disabled = true; // Garante que o download esteja desabilitado no início
+    </script>
+</body>
+</html>
